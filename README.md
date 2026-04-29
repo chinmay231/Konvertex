@@ -67,7 +67,7 @@ git add .
 git commit -m "your change description"
 git push origin main
 ```
-GitHub Actions will run a build on all 4 platforms to verify nothing is broken. No artifacts are stored at this stage.
+GitHub Actions will run a build on all 3 platforms to verify nothing is broken. No artifacts are stored at this stage.
 
 ### Step 2 — Create a GitHub Release
 1. Go to **github.com/chinmay231/Konvertex → Releases → Draft a new release**
@@ -75,11 +75,10 @@ GitHub Actions will run a build on all 4 platforms to verify nothing is broken. 
 3. Set the release title (e.g. `v1.0.1`) and describe what changed
 4. Click **Publish release**
 
-GitHub Actions automatically triggers a build for all 4 platforms. Once complete (~10–15 min), the zips are attached to the release page:
+GitHub Actions automatically triggers a build for all 3 platforms. Once complete (~10–15 min), the zips are attached to the release page:
 - `mimik-scripter-linux.zip`
 - `mimik-scripter-win.zip`
 - `mimik-scripter-mac.zip`
-- `mimik-scripter-macarm.zip`
 
 ### Step 3 — Share the link
 Send coworkers the GitHub Release URL. They pick the zip for their OS, unzip, and launch. Done.
@@ -101,8 +100,7 @@ node build.js    # produces dist/win/  and  dist/mimik-scripter-win.zip
 ### On a Mac:
 ```bash
 node setup.js
-node build.js                          # Intel Mac
-node build.js --platform macarm        # Apple Silicon
+node build.js    # produces dist/mac/  and  dist/mimik-scripter-mac.zip
 ```
 
 ---
