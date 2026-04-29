@@ -38,6 +38,14 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install Linux system libraries
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install -y libgomp1 libsndfile1 espeak-ng
+
+      - name: Install macOS system libraries
+        if: startsWith(matrix.os, 'macos')
+        run: brew install espeak
+
       - name: Cache Kokoro models
         uses: actions/cache@v4
         with:
