@@ -29,7 +29,7 @@ const VENV_PY = IS_WIN
 const MODEL_URL  = 'https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.int8.onnx';
 const VOICES_URL = 'https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin';
 
-const PY_PACKAGES = ['kokoro-onnx', 'soundfile', 'numpy'];
+const PY_PACKAGES = ['pyinstaller', 'kokoro-onnx', 'soundfile', 'numpy'];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -106,7 +106,7 @@ async function createVenv() {
 
 async function installPyPackages() {
   info(`Installing Python packages: ${PY_PACKAGES.join(', ')}`);
-  run(`${PIP} install --upgrade pip --quiet`);
+  run(`${VENV_PY} -m pip install --upgrade pip --quiet`);
   run(`${PIP} install ${PY_PACKAGES.join(' ')} --quiet`);
   ok('Python packages installed');
 }
