@@ -13,14 +13,16 @@ const app    = express();
 const upload = multer({ storage: multer.memoryStorage() });
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(PUBLIC_DIR));
 
 const jobs = {};
 
 const IS_WIN  = process.platform === 'win32';
-// When packaged with pkg, process.pkg is defined and process.execPath is the binary.
 const IS_PKG  = typeof process.pkg !== 'undefined';
 const BASE_DIR = IS_PKG ? path.dirname(process.execPath) : __dirname;
+
+// Static files: next to binary in packaged mode, __dirname/public in dev
+const PUBLIC_DIR = path.join(BASE_DIR, 'public');
 
 // Kokoro binary (used when running as packaged .exe)
 const KOKORO_BIN  = path.join(BASE_DIR, IS_WIN ? 'kokoro_tts.exe' : 'kokoro_tts');
@@ -99,8 +101,8 @@ app.get('/profiles',     (_req, res) => res.json(ONLINE_PROFILES));
 app.get('/local-voices', (_req, res) => res.json(LOCAL_VOICES));
 
 app.get('/local-status', (_req, res) => {
-  const ready = fs.existsSync(path.join(__dirname, 'models', 'kokoro-v1.0.int8.onnx'))
-    && fs.existsSync(path.join(__dirname, 'models', 'voices-v1.0.bin'));
+  const ready = fs.existsSync(path.join(BASE_DIR, 'models', 'kokoro-v1.0.int8.onnx'))
+    && fs.existsSync(path.join(BASE_DIR, 'models', 'voices-v1.0.bin'));
   res.json({ ready, python: PYTHON });
 });
 

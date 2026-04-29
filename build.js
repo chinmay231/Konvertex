@@ -123,7 +123,6 @@ function buildNode(distDir, pkgTarget) {
     PKG,
     'scripter.js',
     '--target', pkgTarget,
-    '--assets', '"public/**"',
     '--output', path.join(distDir, 'mimik-scripter'),
     '--compress', 'GZip'
   ].join(' '));
@@ -132,15 +131,28 @@ function buildNode(distDir, pkgTarget) {
   ok(`mimik-scripter binary → ${sizeMB(path.join(distDir, binName))}`);
 }
 
+function copyDir(src, dest) {
+  fs.mkdirSync(dest, { recursive: true });
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    const s = path.join(src, entry.name);
+    const d = path.join(dest, entry.name);
+    if (entry.isDirectory()) copyDir(s, d);
+    else fs.copyFileSync(s, d);
+  }
+}
+
 function copyModels(distDir) {
   info('Copying models...');
-  const src  = path.join(ROOT, 'models');
   const dest = path.join(distDir, 'models');
-  fs.mkdirSync(dest, { recursive: true });
-  for (const f of fs.readdirSync(src)) {
-    fs.copyFileSync(path.join(src, f), path.join(dest, f));
-  }
+  copyDir(path.join(ROOT, 'models'), dest);
   ok(`models/ → ${sizeMB(dest)}`);
+}
+
+function copyPublic(distDir) {
+  info('Copying public/...');
+  const dest = path.join(distDir, 'public');
+  copyDir(path.join(ROOT, 'public'), dest);
+  ok(`public/ copied`);
 }
 
 function writeLauncher(distDir, isWin) {
@@ -202,6 +214,7 @@ async function buildFor(platformKey, pkgTarget) {
   buildPython(distDir);
   buildNode(distDir, pkgTarget);
   copyModels(distDir);
+  copyPublic(distDir);
   writeLauncher(distDir, platformKey === 'win');
   writeReadme(distDir);
   zipDist(distDir, label);
