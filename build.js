@@ -179,10 +179,14 @@ function zipDist(distDir, label) {
   const zipPath = path.join(ROOT, 'dist', zipName);
   info(`Creating ${zipName}...`);
   try {
-    run(`zip -r "${zipPath}" .`, { cwd: distDir });
+    if (IS_WIN) {
+      run(`powershell -Command "Compress-Archive -Path '${distDir}\\*' -DestinationPath '${zipPath}' -Force"`);
+    } else {
+      run(`zip -r "${zipPath}" .`, { cwd: distDir });
+    }
     ok(`Package → dist/${zipName}  (${sizeMB(zipPath)})`);
-  } catch {
-    warn('zip not available — dist folder ready but not zipped');
+  } catch (e) {
+    warn(`Zip failed: ${e.message}`);
   }
 }
 
