@@ -18,10 +18,8 @@ jobs:
             platform: linux
           - os: windows-latest
             platform: win
-          - os: macos-12
+          - os: macos-latest
             platform: mac
-          - os: macos-14
-            platform: macarm
 
     runs-on: ${{ matrix.os }}
 
@@ -46,7 +44,7 @@ jobs:
 
       - name: Install macOS system libraries
         if: startsWith(matrix.os, 'macos')
-        run: brew install espeak
+        run: brew install espeak-ng
 
       - name: Cache Kokoro models
         uses: actions/cache@v4

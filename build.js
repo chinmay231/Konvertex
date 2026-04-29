@@ -33,10 +33,9 @@ const VENV_PYI = IS_WIN
 const PKG = path.join(ROOT, 'node_modules', '.bin', 'pkg');
 
 const PKG_TARGETS = {
-  linux:  'node18-linux-x64',
-  win:    'node18-win-x64',
-  mac:    'node18-mac-x64',
-  macarm: 'node18-mac-arm64',
+  linux: 'node18-linux-x64',
+  win:   'node18-win-x64',
+  mac:   'node18-mac-arm64',
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -206,7 +205,7 @@ async function buildFor(platformKey, pkgTarget) {
 
 function detectCurrentPlatform() {
   if (IS_WIN) return 'win';
-  if (IS_MAC) return process.arch === 'arm64' ? 'macarm' : 'mac';
+  if (IS_MAC) return 'mac';
   return 'linux';
 }
 
