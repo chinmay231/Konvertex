@@ -58,9 +58,40 @@ That's it. No Node.js, no Python, no pip, no npm — nothing to install.
 
 ---
 
-## Building for Other Platforms
+## Releasing a New Version (How to Ship to Users)
 
-The current build is for **Linux x64**. To build for other platforms, the build must be run natively on that OS (Python's PyInstaller cannot cross-compile).
+All builds happen automatically via GitHub Actions — you never need to build locally for distribution.
+
+### Step 1 — Push your changes to `main`
+```bash
+git add .
+git commit -m "your change description"
+git push origin main
+```
+GitHub Actions will run a build on all 4 platforms to verify nothing is broken. No artifacts are stored at this stage.
+
+### Step 2 — Create a GitHub Release
+1. Go to **github.com/chinmay231/Konvertex → Releases → Draft a new release**
+2. Click **"Choose a tag"** → type a new version tag (e.g. `v1.0.1`) → select **"Create new tag"**
+3. Set the release title (e.g. `v1.0.1`) and describe what changed
+4. Click **Publish release**
+
+GitHub Actions automatically triggers a build for all 4 platforms. Once complete (~10–15 min), the zips are attached to the release page:
+- `mimik-scripter-linux.zip`
+- `mimik-scripter-win.zip`
+- `mimik-scripter-mac.zip`
+- `mimik-scripter-macarm.zip`
+
+### Step 3 — Share the link
+Send coworkers the GitHub Release URL. They pick the zip for their OS, unzip, and launch. Done.
+
+> **Version naming:** Use `v1.0.0`, `v1.1.0`, `v2.0.0` — patch for bug fixes, minor for new features, major for breaking changes.
+
+---
+
+## Building Locally (Developers Only)
+
+Normally you don't need this — use GitHub Releases instead. Local builds are useful for testing the build process itself.
 
 ### On a Windows machine:
 ```bash
@@ -74,9 +105,6 @@ node setup.js
 node build.js                          # Intel Mac
 node build.js --platform macarm        # Apple Silicon
 ```
-
-### All platforms at once (GitHub Actions — recommended):
-See the CI/CD section in [ROADMAP.md](ROADMAP.md) for a ready-to-use workflow that builds all three platform zips automatically on every push.
 
 ---
 
