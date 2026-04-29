@@ -1,0 +1,25 @@
+{
+  "name": "tts_videos",
+  "version": "1.0.0",
+  "description": "Converts any text file into a high-quality MP3 using Microsoft's free neural voices (no API key needed, internet required).",
+  "main": "scripter.js",
+  "scripts": {
+    "start": "node scripter.js",
+    "setup": "node setup.js",
+    "build": "node build.js",
+    "uninstall": "node uninstall.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1",
+    "msedge-tts": "^2.0.5",
+    "multer": "^2.1.1",
+    "uuid": "^14.0.0"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  }
+}

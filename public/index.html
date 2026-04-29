@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mimik Scripter — Neural Voice Studio</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <img src="logo.svg" alt="mimik" />
+    <span class="header-title">Scripter</span>
+  </div>
+  <span class="header-badge">Neural Voice Studio</span>
+</header>
+
+<main>
+  <div class="grid">
+
+    <!-- Left: Script Input -->
+    <div class="card">
+      <div class="card-title">Your Script</div>
+
+      <div class="input-tabs">
+        <button class="tab-btn active" id="tab-paste"  onclick="switchTab('paste')">Paste Text</button>
+        <button class="tab-btn"        id="tab-upload" onclick="switchTab('upload')">Upload File</button>
+      </div>
+
+      <textarea id="script-text"
+        placeholder="Paste your script here — narration, walkthrough, or any text you'd like converted to audio...">
+      </textarea>
+
+      <div class="drop-zone" id="drop-zone">
+        <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p><strong>Drag &amp; drop</strong> a .txt file here</p>
+        <p style="margin-top:6px">or <strong style="color:#3B82F6;cursor:pointer" onclick="document.getElementById('file-input').click()">browse to upload</strong></p>
+        <input type="file" id="file-input" class="file-input" accept=".txt,.md" />
+      </div>
+
+      <div class="char-count"><span id="char-count">0</span> characters</div>
+    </div>
+
+    <!-- Right: Voice & Settings -->
+    <div class="card">
+
+      <!-- Mode Toggle -->
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="mode-online" onclick="switchMode('online')">
+          <span class="mode-dot online"></span> Online &mdash; Microsoft Neural
+        </button>
+        <button class="mode-btn" id="mode-local" onclick="switchMode('local')">
+          <span class="mode-dot local"></span> Local &mdash; Kokoro (Offline)
+        </button>
+      </div>
+
+      <!-- Local model not ready warning -->
+      <div class="local-unavailable" id="local-unavailable">
+        Local model not found. Run <strong>node setup.js</strong> to download it (~115 MB, one-time).
+      </div>
+
+      <!-- Voice section title -->
+      <div class="card-title" id="voice-section-title">Voice Profile</div>
+
+      <!-- Online: 4 profile cards -->
+      <div id="online-section">
+        <div class="profiles-grid" id="profiles-grid"></div>
+      </div>
+
+      <!-- Local: all characters -->
+      <div id="local-section" style="display:none">
+        <div class="local-grid-wrap" id="local-grid-wrap"></div>
+      </div>
+
+      <!-- Sliders -->
+      <div class="settings-section">
+        <div class="settings-title">Fine-tune</div>
+
+        <!-- Speed -->
+        <div class="slider-group">
+          <div class="slider-label-row">
+            <span class="slider-label">
+              Speed
+              <span class="tooltip-wrap">
+                <span class="tooltip-icon">?</span>
+                <span class="tooltip-box">Controls how fast the voice reads your script. Slightly slower sounds more natural for tutorial narration.<br><br>Range: Slow (−20%) to Fast (+20%)</span>
+              </span>
+            </span>
+            <span class="slider-value" id="speed-val">-5%</span>
+          </div>
+          <input type="range" id="slider-speed" min="-20" max="20" value="-5" step="1"
+            oninput="updateSlider('speed', this.value)" />
+          <div class="slider-ends"><span>Slow</span><span>Normal</span><span>Fast</span></div>
+        </div>
+
+        <!-- Volume -->
+        <div class="slider-group">
+          <div class="slider-label-row">
+            <span class="slider-label">
+              Volume
+              <span class="tooltip-wrap">
+                <span class="tooltip-icon">?</span>
+                <span class="tooltip-box">Boosts the output loudness. A +15–25% increase ensures your audio sits well in a video track.<br><br>Range: Normal (0%) to Very Loud (+50%)</span>
+              </span>
+            </span>
+            <span class="slider-value" id="volume-val">+15%</span>
+          </div>
+          <input type="range" id="slider-volume" min="0" max="50" value="15" step="1"
+            oninput="updateSlider('volume', this.value)" />
+          <div class="slider-ends"><span>Normal</span><span>Louder</span><span>Max</span></div>
+        </div>
+
+        <!-- Pitch (online only) -->
+        <div class="slider-group" id="pitch-group">
+          <div class="slider-label-row">
+            <span class="slider-label" id="pitch-label">
+              Clarity / Pitch
+              <span class="tooltip-wrap">
+                <span class="tooltip-icon">?</span>
+                <span class="tooltip-box">Raises or lowers the voice tone. A small upward shift (+5 to +8 Hz) opens up muffled voices and improves clarity of 's' sounds.<br><br>Range: Lower (−10 Hz) to Higher (+20 Hz)</span>
+              </span>
+            </span>
+            <span class="slider-value" id="pitch-val">+5Hz</span>
+          </div>
+          <input type="range" id="slider-pitch" min="-10" max="20" value="5" step="1"
+            oninput="updateSlider('pitch', this.value)" />
+          <div class="slider-ends"><span>Lower</span><span>Neutral</span><span>Higher</span></div>
+          <div class="pitch-local-note" id="pitch-local-note">Pitch adjustment is not available in local mode.</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Error Banner -->
+  <div class="error-banner" id="error-banner"></div>
+
+  <!-- Generate -->
+  <div class="generate-row">
+    <button class="btn-generate" id="btn-generate" onclick="generate()">Generate Audio</button>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-section" id="progress-section">
+    <div class="progress-header">
+      <span class="progress-status" id="progress-status">Connecting...</span>
+      <span class="progress-pct"    id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="result-section" id="result-section">
+    <div class="result-card">
+      <div class="result-header">
+        <span class="result-title"><span class="result-dot"></span> Audio ready</span>
+      </div>
+      <audio id="audio-player" controls></audio>
+      <div class="result-actions">
+        <a class="btn-download" id="btn-download" href="#" download="mimik_audio.mp3">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Download
+        </a>
+        <button class="btn-reset" onclick="reset()">New Audio</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Mimik Scripter &mdash; powered by Microsoft Neural Voices &amp; Kokoro &mdash; mimik Technology Inc.
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

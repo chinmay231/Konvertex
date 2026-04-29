@@ -1,0 +1,23 @@
+# Dependencies — reinstalled by setup.js / npm install
+node_modules/
+.venv/
+
+# Kokoro model files — downloaded by setup.js (~116 MB, too large for git)
+models/
+
+# Build output — produced by build.js
+dist/
+
+# Audio test files
+*.mp3
+*.wav
+
+# Python build artefacts
+__pycache__/
+*.pyc
+*.spec
+.pyibuild/
+
+# OS
+.DS_Store
+Thumbs.db
