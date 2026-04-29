@@ -1,0 +1,24 @@
+hbtx1a@hbtx1a:~/Downloads/mimik-scripter-linux$  ./launch-mimik-scripter.sh
+pkg/prelude/bootstrap.js:1926
+      return wrapper.apply(this.exports, args);
+                     ^
+
+ReferenceError: Cannot access 'PUBLIC_DIR' before initialization
+    at Object.<anonymous> (/snapshot/Konvertex/scripter.js)
+    at Module._compile (pkg/prelude/bootstrap.js:1926:22)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1166:10)
+    at Module.load (node:internal/modules/cjs/loader:988:32)
+    at Module._load (node:internal/modules/cjs/loader:834:12)
+    at Function.runMain (pkg/prelude/bootstrap.js:1979:12)
+    at node:internal/main/run_main_module:17:47
+
+Node.js v18.5.0
+hbtx1a@hbtx1a:~/Downloads/mimik-scripter-linux$ 
+
+
+
+
+Does not work on linux or windows. Opens localhosty but does not run in background. IDK wher eit is? dose not start a terminal I can see or review logs in. Very bad. 
+
+
+Also no Uninstall file there. 
