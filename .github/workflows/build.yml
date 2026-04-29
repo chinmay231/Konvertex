@@ -8,6 +8,8 @@ on:
 
 jobs:
   build:
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -16,7 +18,7 @@ jobs:
             platform: linux
           - os: windows-latest
             platform: win
-          - os: macos-13
+          - os: macos-12
             platform: mac
           - os: macos-14
             platform: macarm
