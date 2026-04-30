@@ -151,8 +151,13 @@ app.post('/generate', async (req, res) => {
     });
 
     const ws = fs.createWriteStream(outPath);
+    const wordCount = text.trim().split(/\s+/).length;
+    const expectedChunks = Math.max(10, Math.floor(wordCount / 10));
     let chunks = 0;
-    audioStream.on('data', () => { chunks++; jobs[jobId].progress = Math.min(90, 30 + chunks * 3); });
+    audioStream.on('data', () => {
+      chunks++;
+      jobs[jobId].progress = Math.min(93, 30 + Math.round((chunks / expectedChunks) * 63));
+    });
     audioStream.pipe(ws);
     ws.on('finish', () => { jobs[jobId].status = 'done'; jobs[jobId].progress = 100; });
     ws.on('error',  e  => { jobs[jobId].status = 'error'; jobs[jobId].error = e.message; log(`ERROR online job ${jobId}: ${e.message}`); });
@@ -191,9 +196,17 @@ app.post('/generate-local', (req, res) => {
     '--output', outPath
   ]);
 
-  jobs[jobId].progress = 40;
+  jobs[jobId].progress = 10;
 
   let stderr = '';
+  proc.stdout.on('data', d => {
+    for (const line of d.toString().split('\n')) {
+      try {
+        const msg = JSON.parse(line.trim());
+        if (typeof msg.progress === 'number') jobs[jobId].progress = msg.progress;
+      } catch {}
+    }
+  });
   proc.stderr.on('data', d => { stderr += d.toString(); });
   proc.on('close', code => {
     if (code !== 0) {

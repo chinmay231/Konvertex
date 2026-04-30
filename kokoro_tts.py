@@ -3,7 +3,7 @@
 Kokoro TTS subprocess — called by scripter.js (dev) or kokoro_tts binary (packaged).
 Uses stdlib `wave` instead of soundfile to keep the PyInstaller bundle small.
 """
-import sys, os, json, argparse, wave
+import sys, os, json, argparse, wave, re
 import numpy as np
 
 # When running as a PyInstaller binary, sys.executable is the binary itself.
@@ -33,7 +33,7 @@ def main():
     p.add_argument('--text',   default='')
     p.add_argument('--voice',  default='am_michael')
     p.add_argument('--speed',  type=float, default=1.0)
-    p.add_argument('--volume', type=float, default=0.15)
+    p.add_argument('--volume', type=float, default=0.0)
     p.add_argument('--output', default='')
     p.add_argument('--check',  action='store_true')
     args = p.parse_args()
@@ -53,7 +53,20 @@ def main():
 
     from kokoro_onnx import Kokoro
     k = Kokoro(MODEL_PATH, VOICES_PATH)
-    samples, sr = k.create(args.text, voice=args.voice, speed=args.speed, lang='en-us')
+
+    sentences = [s.strip() for s in re.split(r'(?<=[.!?…])\s+', args.text.strip()) if s.strip()]
+    if not sentences:
+        sentences = [args.text.strip()]
+    total = len(sentences)
+
+    print(json.dumps({'progress': 10}), flush=True)
+    all_samples = []
+    for i, sentence in enumerate(sentences):
+        s, sr = k.create(sentence, voice=args.voice, speed=args.speed, lang='en-us')
+        all_samples.append(s)
+        print(json.dumps({'progress': 10 + int(((i + 1) / total) * 85)}), flush=True)
+
+    samples = np.concatenate(all_samples) if len(all_samples) > 1 else all_samples[0]
 
     if args.volume != 0:
         samples = np.clip(samples * (1.0 + args.volume), -1.0, 1.0)
