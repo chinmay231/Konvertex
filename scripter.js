@@ -9,6 +9,11 @@ const path     = require('path');
 const fs       = require('fs');
 const os       = require('os');
 
+const IS_WIN   = process.platform === 'win32';
+const IS_PKG   = typeof process.pkg !== 'undefined';
+const BASE_DIR = IS_PKG ? path.dirname(process.execPath) : __dirname;
+const PUBLIC_DIR = path.join(BASE_DIR, 'public');
+
 const app    = express();
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -16,13 +21,6 @@ app.use(express.json());
 app.use(express.static(PUBLIC_DIR));
 
 const jobs = {};
-
-const IS_WIN  = process.platform === 'win32';
-const IS_PKG  = typeof process.pkg !== 'undefined';
-const BASE_DIR = IS_PKG ? path.dirname(process.execPath) : __dirname;
-
-// Static files: next to binary in packaged mode, __dirname/public in dev
-const PUBLIC_DIR = path.join(BASE_DIR, 'public');
 
 // Kokoro binary (used when running as packaged .exe)
 const KOKORO_BIN  = path.join(BASE_DIR, IS_WIN ? 'kokoro_tts.exe' : 'kokoro_tts');
