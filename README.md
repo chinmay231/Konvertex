@@ -28,14 +28,39 @@ Extract the zip anywhere — Desktop, Documents, wherever you like.
 ```bash
 ./launch-mimik-scripter.sh
 ```
-Or double-click it in your file manager.
 
 **Windows:**
 Double-click `Launch Mimik Scripter.bat`
 
-### Step 4 — Use it
-
 Your browser opens automatically at **http://localhost:8004**
+
+---
+
+## Terminal Commands (Start / Stop / Status / Uninstall)
+
+Every zip includes a management script for full control from the terminal.
+
+**Linux / Mac — `mimik.sh`**
+```bash
+./mimik.sh start      # start server and open browser
+./mimik.sh stop       # stop the server
+./mimik.sh status     # check if it's running
+./mimik.sh uninstall  # stop and delete everything
+```
+
+**Windows — `mimik.bat`**
+```bat
+mimik.bat start
+mimik.bat stop
+mimik.bat status
+mimik.bat uninstall
+```
+
+Logs are written to `mimik-scripter.log` in the same folder.
+
+---
+
+### Step 4 — Use it
 
 That's it. No Node.js, no Python, no pip, no npm — nothing to install.
 

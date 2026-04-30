@@ -183,23 +183,174 @@ function writeLauncher(distDir, isWin) {
 }
 
 function writeReadme(distDir) {
+  const isWin = fs.existsSync(path.join(distDir, 'mimik-scripter.exe'));
+  const cli   = isWin ? 'mimik.bat' : './mimik.sh';
   const txt = `Mimik Scripter
 ==============
 
-1. Run the launcher:
-   - Windows: double-click "Launch Mimik Scripter.bat"
-   - Mac/Linux: run ./launch-mimik-scripter.sh
+QUICK START
+-----------
+${isWin
+  ? 'Double-click "Launch Mimik Scripter.bat"'
+  : 'Run: ./launch-mimik-scripter.sh'}
+Your browser opens automatically at http://localhost:8004
 
-2. Your browser will open automatically at http://localhost:8004
+TERMINAL COMMANDS
+-----------------
+${cli} start      — Start the server and open browser
+${cli} stop       — Stop the running server
+${cli} status     — Check if the server is running
+${cli} uninstall  — Stop and delete all files
 
-3. To stop: close the terminal window.
+LOGS
+----
+Server output is saved to mimik-scripter.log in this folder.
 
 No installation required. Internet needed for Online mode only.
 Local (Kokoro) mode works fully offline.
-
-To uninstall: close the app and delete this folder. Nothing else to remove.
 `;
   fs.writeFileSync(path.join(distDir, 'README.txt'), txt);
+}
+
+function writeCLI(distDir, isWin) {
+  if (isWin) {
+    const bat = [
+      '@echo off',
+      'cd /d "%~dp0"',
+      'set PID_FILE=%~dp0.mimik.pid',
+      '',
+      'if "%1"=="start"     goto start',
+      'if "%1"=="stop"      goto stop',
+      'if "%1"=="status"    goto status',
+      'if "%1"=="uninstall" goto uninstall',
+      'goto usage',
+      '',
+      ':start',
+      'if exist "%PID_FILE%" (',
+      '  set /p _PID=<"%PID_FILE%"',
+      '  tasklist /fi "PID eq %_PID%" 2>nul | find "%_PID%" >nul',
+      '  if not errorlevel 1 (',
+      '    echo Already running ^(PID %_PID%^) — http://localhost:8004',
+      '    exit /b 0',
+      '  )',
+      ')',
+      'echo Starting Mimik Scripter...',
+      'start /b "" "%~dp0mimik-scripter.exe" > "%~dp0mimik-scripter.log" 2>&1',
+      'timeout /t 2 /nobreak >nul',
+      'for /f "tokens=2" %%i in (\'tasklist /fi "imagename eq mimik-scripter.exe" /fo list ^| findstr "PID"\') do (',
+      '  echo %%i > "%PID_FILE%"',
+      '  echo Started — PID %%i',
+      ')',
+      'echo Open: http://localhost:8004',
+      'start http://localhost:8004',
+      'exit /b 0',
+      '',
+      ':stop',
+      'if not exist "%PID_FILE%" ( echo Not running. & exit /b 0 )',
+      'set /p _PID=<"%PID_FILE%"',
+      'taskkill /pid %_PID% /f >nul 2>&1',
+      'del "%PID_FILE%" >nul 2>&1',
+      'echo Stopped.',
+      'exit /b 0',
+      '',
+      ':status',
+      'if not exist "%PID_FILE%" ( echo Not running. & exit /b 0 )',
+      'set /p _PID=<"%PID_FILE%"',
+      'tasklist /fi "PID eq %_PID%" 2>nul | find "%_PID%" >nul',
+      'if not errorlevel 1 (',
+      '  echo Running — PID %_PID%',
+      '  echo Open: http://localhost:8004',
+      ') else (',
+      '  echo Not running.',
+      '  del "%PID_FILE%" >nul 2>&1',
+      ')',
+      'exit /b 0',
+      '',
+      ':uninstall',
+      'set /p _confirm=Stop and delete Mimik Scripter? (y/N): ',
+      'if /i not "%_confirm%"=="y" ( echo Cancelled. & exit /b 0 )',
+      'if exist "%PID_FILE%" ( set /p _PID=<"%PID_FILE%" & taskkill /pid %_PID% /f >nul 2>&1 )',
+      'cd %TEMP%',
+      'rmdir /s /q "%~dp0"',
+      'echo Uninstalled.',
+      'exit /b 0',
+      '',
+      ':usage',
+      'echo Usage: mimik.bat [start^|stop^|status^|uninstall]',
+      'echo.',
+      'echo   start      Start the server and open browser',
+      'echo   stop       Stop the running server',
+      'echo   status     Check if the server is running',
+      'echo   uninstall  Stop and delete all files',
+      'exit /b 0',
+    ].join('\r\n') + '\r\n';
+    fs.writeFileSync(path.join(distDir, 'mimik.bat'), bat);
+  } else {
+    const sh = [
+      '#!/bin/bash',
+      'DIR="$(cd "$(dirname "$0")" && pwd)"',
+      'BIN="$DIR/mimik-scripter"',
+      'PID_FILE="$DIR/.mimik.pid"',
+      'LOG="$DIR/mimik-scripter.log"',
+      '',
+      'cmd="${1:-}"',
+      '',
+      'is_running() {',
+      '  [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null',
+      '}',
+      '',
+      'case "$cmd" in',
+      '  start)',
+      '    if is_running; then',
+      '      echo "Already running (PID $(cat "$PID_FILE")) — http://localhost:8004"',
+      '      exit 0',
+      '    fi',
+      '    echo "Starting Mimik Scripter..."',
+      '    "$BIN" > "$LOG" 2>&1 &',
+      '    echo $! > "$PID_FILE"',
+      '    sleep 2',
+      '    echo "Running — PID $(cat "$PID_FILE")"',
+      '    echo "Open: http://localhost:8004"',
+      '    echo "Logs: $LOG"',
+      '    open http://localhost:8004 2>/dev/null || xdg-open http://localhost:8004 2>/dev/null || true',
+      '    ;;',
+      '  stop)',
+      '    if ! is_running; then echo "Not running."; exit 0; fi',
+      '    kill "$(cat "$PID_FILE")" && rm -f "$PID_FILE"',
+      '    echo "Stopped."',
+      '    ;;',
+      '  status)',
+      '    if is_running; then',
+      '      echo "Running — PID $(cat "$PID_FILE")"',
+      '      echo "Open: http://localhost:8004"',
+      '    else',
+      '      echo "Not running."',
+      '      rm -f "$PID_FILE"',
+      '    fi',
+      '    ;;',
+      '  uninstall)',
+      '    echo "This will stop Mimik Scripter and delete: $DIR"',
+      '    read -r -p "Are you sure? (y/N) " confirm',
+      '    if [[ "$confirm" != [yY] ]]; then echo "Cancelled."; exit 0; fi',
+      '    is_running && kill "$(cat "$PID_FILE")" 2>/dev/null',
+      '    rm -rf "$DIR"',
+      '    echo "Uninstalled."',
+      '    ;;',
+      '  *)',
+      '    echo "Usage: ./mimik.sh [start|stop|status|uninstall]"',
+      '    echo ""',
+      '    echo "  start      Start the server and open browser"',
+      '    echo "  stop       Stop the running server"',
+      '    echo "  status     Check if the server is running"',
+      '    echo "  uninstall  Stop and delete all files"',
+      '    ;;',
+      'esac',
+    ].join('\n') + '\n';
+    const p = path.join(distDir, 'mimik.sh');
+    fs.writeFileSync(p, sh);
+    fs.chmodSync(p, 0o755);
+  }
+  ok('CLI management script created');
 }
 
 function zipDist(distDir, label) {
@@ -232,6 +383,7 @@ async function buildFor(platformKey, pkgTarget) {
   copyModels(distDir);
   copyPublic(distDir);
   writeLauncher(distDir, platformKey === 'win');
+  writeCLI(distDir, platformKey === 'win');
   writeReadme(distDir);
   zipDist(distDir, label);
 }
