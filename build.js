@@ -157,10 +157,24 @@ function copyPublic(distDir) {
 
 function writeLauncher(distDir, isWin) {
   if (isWin) {
-    const bat = `@echo off\nstart "" "%~dp0mimik-scripter.exe"\ntimeout /t 2 /nobreak >nul\nstart http://localhost:8004\n`;
+    // Run server in same window so output is visible; open browser in background
+    const bat = [
+      '@echo off',
+      'cd /d "%~dp0"',
+      'echo Starting Mimik Scripter...',
+      'start /b cmd /c "timeout /t 2 /nobreak >nul && start http://localhost:8004"',
+      'mimik-scripter.exe',
+    ].join('\r\n') + '\r\n';
     fs.writeFileSync(path.join(distDir, 'Launch Mimik Scripter.bat'), bat);
   } else {
-    const sh = `#!/bin/bash\nDIR="$(cd "$(dirname "$0")" && pwd)"\n"$DIR/mimik-scripter" &\nsleep 2\nopen http://localhost:8004 2>/dev/null || xdg-open http://localhost:8004\n`;
+    // Open browser in background; run server in foreground so terminal stays open
+    const sh = [
+      '#!/bin/bash',
+      'DIR="$(cd "$(dirname "$0")" && pwd)"',
+      'echo "Starting Mimik Scripter..."',
+      '(sleep 2 && open http://localhost:8004 2>/dev/null || sleep 2 && xdg-open http://localhost:8004 2>/dev/null) &',
+      '"$DIR/mimik-scripter"',
+    ].join('\n') + '\n';
     const p = path.join(distDir, 'launch-mimik-scripter.sh');
     fs.writeFileSync(p, sh);
     fs.chmodSync(p, 0o755);
@@ -178,10 +192,12 @@ function writeReadme(distDir) {
 
 2. Your browser will open automatically at http://localhost:8004
 
-3. To stop: close the terminal window that appeared.
+3. To stop: close the terminal window.
 
 No installation required. Internet needed for Online mode only.
 Local (Kokoro) mode works fully offline.
+
+To uninstall: close the app and delete this folder. Nothing else to remove.
 `;
   fs.writeFileSync(path.join(distDir, 'README.txt'), txt);
 }
