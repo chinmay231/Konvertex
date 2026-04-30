@@ -88,7 +88,7 @@ function buildPython(distDir) {
   const excludes = [
     'matplotlib', 'PIL', 'Pillow', 'tkinter', 'scipy',
     'pandas', 'IPython', 'jupyter', 'notebook', 'test',
-    'unittest', 'xmlrpc', 'pydoc', 'doctest', 'difflib'
+    'unittest', 'xmlrpc', 'doctest', 'difflib'
   ].map(m => `--exclude-module ${m}`).join(' ');
 
   run([
