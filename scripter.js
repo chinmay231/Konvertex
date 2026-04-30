@@ -14,11 +14,28 @@ const IS_PKG   = typeof process.pkg !== 'undefined';
 const BASE_DIR = IS_PKG ? path.dirname(process.execPath) : __dirname;
 const PUBLIC_DIR = path.join(BASE_DIR, 'public');
 
+// ── Logging ───────────────────────────────────────────────────────────────────
+
+const LOG_FILE = path.join(BASE_DIR, 'mimik-scripter.log');
+const logStream = fs.createWriteStream(LOG_FILE, { flags: 'a' });
+
+function log(...args) {
+  const line = `[${new Date().toISOString()}] ${args.join(' ')}`;
+  console.log(line);
+  logStream.write(line + '\n');
+}
+
 const app    = express();
 const upload = multer({ storage: multer.memoryStorage() });
 
 app.use(express.json());
 app.use(express.static(PUBLIC_DIR));
+
+// Request logger
+app.use((req, _res, next) => {
+  if (!req.path.startsWith('/status')) log(`${req.method} ${req.path}`);
+  next();
+});
 
 const jobs = {};
 
@@ -138,8 +155,8 @@ app.post('/generate', async (req, res) => {
     audioStream.on('data', () => { chunks++; jobs[jobId].progress = Math.min(90, 30 + chunks * 3); });
     audioStream.pipe(ws);
     ws.on('finish', () => { jobs[jobId].status = 'done'; jobs[jobId].progress = 100; });
-    ws.on('error',  e  => { jobs[jobId].status = 'error'; jobs[jobId].error = e.message; });
-    audioStream.on('error', e => { jobs[jobId].status = 'error'; jobs[jobId].error = e.message; });
+    ws.on('error',  e  => { jobs[jobId].status = 'error'; jobs[jobId].error = e.message; log(`ERROR online job ${jobId}: ${e.message}`); });
+    audioStream.on('error', e => { jobs[jobId].status = 'error'; jobs[jobId].error = e.message; log(`ERROR online stream ${jobId}: ${e.message}`); });
   } catch (e) {
     jobs[jobId] = { status: 'error', error: e.message };
   }
@@ -182,6 +199,7 @@ app.post('/generate-local', (req, res) => {
     if (code !== 0) {
       jobs[jobId].status = 'error';
       jobs[jobId].error  = stderr || `Process exited with code ${code}`;
+      log(`ERROR local job ${jobId}: ${jobs[jobId].error}`);
     } else {
       jobs[jobId].status = 'done'; jobs[jobId].progress = 100;
     }
@@ -210,4 +228,7 @@ app.get('/download/:jobId', (req, res) => {
 });
 
 const PORT = process.env.PORT || 8004;
-app.listen(PORT, () => console.log(`Mimik Scripter running at http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  log(`Mimik Scripter running at http://localhost:${PORT}`);
+  log(`Log file: ${LOG_FILE}`);
+});
