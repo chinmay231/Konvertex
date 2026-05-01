@@ -1,0 +1,66 @@
+Starting Mimik Scripter...
+[2026-05-01T04:41:04.071Z] Mimik Scripter running at http://localhost:8004
+[2026-05-01T04:41:04.075Z] Log file: C:\Users\kapoo\Downloads\mimik-scripter-win\mimik-scripter.log
+[2026-05-01T04:41:04.910Z] GET /profiles
+[2026-05-01T04:41:04.914Z] GET /local-voices
+[2026-05-01T04:41:04.915Z] GET /local-status
+[2026-05-01T04:41:05.018Z] GET /favicon.ico
+[2026-05-01T04:41:53.408Z] POST /generate
+[2026-05-01T04:41:56.183Z] GET /audio/beb747c6-61a9-49ce-8851-4b439de42589
+[2026-05-01T04:41:56.396Z] GET /favicon.ico
+[2026-05-01T04:41:59.458Z] POST /generate
+[2026-05-01T04:42:01.354Z] GET /audio/75d09015-18e2-493f-b347-d8ce6fb9ac4e
+[2026-05-01T04:42:24.958Z] POST /generate
+[2026-05-01T04:42:26.872Z] GET /audio/e1598898-5414-4883-a13e-74a3a9662fd7
+[2026-05-01T04:42:43.924Z] POST /generate
+[2026-05-01T04:42:46.200Z] GET /audio/9f046e1f-98b3-4d61-a2a6-080fa6aa7662
+[2026-05-01T04:42:55.766Z] POST /generate
+[2026-05-01T04:42:57.634Z] GET /audio/313239cd-32a1-4fd7-9a28-1bc395ca5de5
+[2026-05-01T04:43:22.912Z] POST /generate-local
+[2026-05-01T04:43:30.389Z] ERROR local job d893a62f-dc9d-4645-b38e-8cc158fd381c: Traceback (most recent call last):
+  File "kokoro_tts.py", line 79, in <module>
+  File "kokoro_tts.py", line 54, in main
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "pyimod02_importers.py", line 457, in exec_module
+  File "kokoro_onnx\__init__.py", line 16, in <module>
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "pyimod02_importers.py", line 457, in exec_module
+  File "kokoro_onnx\config.py", line 47, in <module>
+  File "kokoro_onnx\config.py", line 42, in get_vocab
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\kapoo\\AppData\\Local\\Temp\\_MEI132802\\kokoro_onnx\\config.json'
+[PYI-18104:ERROR] Failed to execute script 'kokoro_tts' due to unhandled exception!
+
+[2026-05-01T04:43:40.383Z] POST /generate-local
+[2026-05-01T04:43:50.779Z] ERROR local job a758c8b7-2bef-4959-bf44-42214df29a4d: Traceback (most recent call last):
+  File "kokoro_tts.py", line 79, in <module>
+  File "kokoro_tts.py", line 54, in main
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "pyimod02_importers.py", line 457, in exec_module
+  File "kokoro_onnx\__init__.py", line 16, in <module>
+  File "<frozen importlib._bootstrap>", line 1176, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1147, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 690, in _load_unlocked
+  File "pyimod02_importers.py", line 457, in exec_module
+  File "kokoro_onnx\config.py", line 47, in <module>
+  File "kokoro_onnx\config.py", line 42, in get_vocab
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\kapoo\\AppData\\Local\\Temp\\_MEI162602\\kokoro_onnx\\config.json'
+[PYI-16808:ERROR] Failed to execute script 'kokoro_tts' due to unhandled exception!
+
+[2026-05-01T04:44:16.849Z] POST /generate
+[2026-05-01T04:44:18.365Z] GET /audio/bd765871-65d2-4c28-aa10-7352c9cf9bff
+[2026-05-01T04:44:22.224Z] POST /generate
+[2026-05-01T04:44:25.587Z] GET /audio/fd7e7cc7-df22-420d-896d-9798cc32f2fc
+[2026-05-01T04:44:35.633Z] POST /generate
+[2026-05-01T04:44:38.272Z] GET /audio/60796132-477a-4253-bd40-70f09eb307f3
+[2026-05-01T04:45:24.657Z] POST /generate
+[2026-05-01T04:45:27.298Z] GET /audio/2ca671fb-d866-4ebc-9694-a80c67cf1b95
+[2026-05-01T04:45:42.624Z] POST /generate
+[2026-05-01T04:45:45.632Z] GET /audio/4951e250-c60b-4ac1-9b43-a57d584a3461
+[2026-05-01T04:45:59.515Z] POST /generate
+[2026-05-01T04:46:02.869Z] GET /audio/f29322bf-e036-4f0d-a761-54e058dfbd01
