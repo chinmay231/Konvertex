@@ -30,7 +30,7 @@ const PLATFORM_ARG = ARGS.find(a => a.startsWith('--platform='))?.split('=')[1]
 const VENV_PYI = IS_WIN
   ? path.join(ROOT, '.venv', 'Scripts', 'pyinstaller.exe')
   : path.join(ROOT, '.venv', 'bin', 'pyinstaller');
-const PKG = path.join(ROOT, 'node_modules', '.bin', 'pkg');
+const PKG = path.join(ROOT, 'node_modules', '.bin', 'pkg') // @yao-pkg/pkg installs as 'pkg'
 
 const PKG_TARGETS = {
   linux:       'node18-linux-x64',
