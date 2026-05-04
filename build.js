@@ -125,29 +125,49 @@ function buildPython(distDir) {
   }
 }
 
+function signPkgCache() {
+  // macOS 15 refuses to spawn unsigned arm64 binaries (errno -86 / EBADARCH).
+  // pkg's downloaded base Node binary is unsigned, so fabrication fails.
+  // Ad-hoc sign every file in the pkg cache before pkg's fabricate step.
+  const cacheDir = path.join(process.env.HOME || '', '.pkg-cache');
+  if (!fs.existsSync(cacheDir)) return;
+  try {
+    execSync(
+      `find "${cacheDir}" -type f -exec codesign --force --sign - {} + 2>/dev/null`,
+      { stdio: 'pipe' }
+    );
+  } catch {}
+}
+
 function buildNode(distDir, pkgTarget) {
   info(`Building scripter binary with pkg (${pkgTarget})...`);
-  // --public uses official nodejs.org binaries (signed/notarized) instead of
-  // pkg's patched ones, which fail to spawn on macOS 15 with errno -86 (EBADARCH).
-  run([
+
+  const pkgArgs = [
     PKG,
     'scripter.js',
     '--target', pkgTarget,
     '--output', path.join(distDir, 'mimik-scripter'),
-    '--public',
     '--compress', 'GZip'
-  ].join(' '));
+  ].join(' ');
+
+  try {
+    run(pkgArgs);
+  } catch (e) {
+    if (!IS_MAC) throw e;
+    // First run downloaded the base binary; sign it and retry fabrication.
+    warn('pkg fabrication failed — signing pkg cache and retrying');
+    signPkgCache();
+    run(pkgArgs);
+  }
 
   const binName = pkgTarget.includes('win') ? 'mimik-scripter.exe' : 'mimik-scripter';
   const binPath = path.join(distDir, binName);
 
-  // macOS arm64 requires every binary to carry at least an ad-hoc code signature.
-  // pkg writes an unsigned binary, so re-sign it before zipping.
   if (pkgTarget.includes('mac') && IS_MAC) {
     try {
       run(`codesign --force --sign - "${binPath}"`);
       ok('Ad-hoc signed mimik-scripter binary');
-    } catch (e) {
+    } catch {
       warn('codesign failed — binary may not run on macOS 15');
     }
   }
