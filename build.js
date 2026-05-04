@@ -127,16 +127,32 @@ function buildPython(distDir) {
 
 function buildNode(distDir, pkgTarget) {
   info(`Building scripter binary with pkg (${pkgTarget})...`);
+  // --public uses official nodejs.org binaries (signed/notarized) instead of
+  // pkg's patched ones, which fail to spawn on macOS 15 with errno -86 (EBADARCH).
   run([
     PKG,
     'scripter.js',
     '--target', pkgTarget,
     '--output', path.join(distDir, 'mimik-scripter'),
+    '--public',
     '--compress', 'GZip'
   ].join(' '));
 
   const binName = pkgTarget.includes('win') ? 'mimik-scripter.exe' : 'mimik-scripter';
-  ok(`mimik-scripter binary → ${sizeMB(path.join(distDir, binName))}`);
+  const binPath = path.join(distDir, binName);
+
+  // macOS arm64 requires every binary to carry at least an ad-hoc code signature.
+  // pkg writes an unsigned binary, so re-sign it before zipping.
+  if (pkgTarget.includes('mac') && IS_MAC) {
+    try {
+      run(`codesign --force --sign - "${binPath}"`);
+      ok('Ad-hoc signed mimik-scripter binary');
+    } catch (e) {
+      warn('codesign failed — binary may not run on macOS 15');
+    }
+  }
+
+  ok(`mimik-scripter binary → ${sizeMB(binPath)}`);
 }
 
 function copyDir(src, dest) {
