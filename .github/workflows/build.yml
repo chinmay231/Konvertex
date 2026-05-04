@@ -20,7 +20,7 @@ jobs:
             platform: win
           - os: macos-latest
             platform: mac
-          - os: macos-13
+          - os: macos-15-intel
             platform: mac-intel
 
     runs-on: ${{ matrix.os }}
