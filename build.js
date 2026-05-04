@@ -101,6 +101,8 @@ function buildPython(distDir) {
     '--specpath', workDir,
     '--noconfirm',
     '--log-level WARN',
+    '--collect-data kokoro_onnx',
+    '--collect-data espeakng_loader',
     excludes
   ].join(' '));
 
