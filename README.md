@@ -16,7 +16,8 @@ No installation needed. Download the zip for your operating system, unzip, and l
 |---|---|
 | Linux (Ubuntu, Debian, etc.) | `mimik-scripter-linux.zip` |
 | Windows 10 / 11 | `mimik-scripter-win.zip` |
-| macOS (any — Intel or Apple Silicon) | `mimik-scripter-mac.zip` |
+| macOS — Apple Silicon (M1/M2/M3/M4) | `mimik-scripter-mac.zip` |
+| macOS — Intel (i5/i7/i9) | `mimik-scripter-mac-intel.zip` |
 
 ### Step 2 — Unzip
 
@@ -72,8 +73,8 @@ That's it. No Node.js, no Python, no pip, no npm — nothing to install.
 |---|---|---|
 | Linux | x64 (most desktops/servers) | Yes |
 | Windows | x64 | Yes |
-| macOS | Apple Silicon (M1/M2/M3/M4) | Yes |
-| macOS | Intel | Yes — runs via Rosetta 2 automatically |
+| macOS | Apple Silicon (M1/M2/M3/M4) | Yes — use `mac.zip` |
+| macOS | Intel (i5/i7/i9) | Yes — use `mac-intel.zip` |
 
 > **Why separate builds per OS?**
 > Each binary bundles a complete Node.js runtime and Python engine compiled for that platform.
