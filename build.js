@@ -103,6 +103,12 @@ function buildPython(distDir) {
     '--log-level WARN',
     '--collect-data kokoro_onnx',
     '--collect-data espeakng_loader',
+    '--collect-data language_tags',
+    '--collect-data babel',
+    '--collect-data jsonschema_specifications',
+    '--collect-data onnxruntime',
+    '--collect-data numpy',
+    '--collect-data certifi',
     excludes
   ].join(' '));
 
