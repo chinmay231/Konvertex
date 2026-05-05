@@ -24,20 +24,15 @@ const IS_MAC = process.platform === 'darwin';
 const ARGS         = process.argv.slice(2);
 const SKIP_PYTHON  = ARGS.includes('--skip-python');
 const BUILD_ALL    = ARGS.includes('--all');
+const PLATFORM_IDX = ARGS.indexOf('--platform');
 const PLATFORM_ARG = ARGS.find(a => a.startsWith('--platform='))?.split('=')[1]
-  || (ARGS[ARGS.indexOf('--platform') + 1]);
+  || (PLATFORM_IDX !== -1 ? ARGS[PLATFORM_IDX + 1] : undefined);
 
 const VENV_PYI = IS_WIN
   ? path.join(ROOT, '.venv', 'Scripts', 'pyinstaller.exe')
   : path.join(ROOT, '.venv', 'bin', 'pyinstaller');
-const PKG = path.join(ROOT, 'node_modules', '.bin', 'pkg') // @yao-pkg/pkg installs as 'pkg'
 
-const PKG_TARGETS = {
-  linux:       'node18-linux-x64',
-  win:         'node18-win-x64',
-  mac:         'node18-mac-arm64',
-  'mac-intel': 'node18-mac-x64',
-};
+const PLATFORMS = ['linux', 'win', 'mac', 'mac-intel'];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -59,8 +54,8 @@ function sizeMB(p) {
 // ── Steps ─────────────────────────────────────────────────────────────────────
 
 function checkTools() {
-  if (!fs.existsSync(PKG)) {
-    console.error('\n  pkg not found. Run: npm install\n');
+  if (!fs.existsSync(path.join(ROOT, 'node_modules'))) {
+    console.error('\n  node_modules not found. Run: npm install\n');
     process.exit(1);
   }
   if (!fs.existsSync(VENV_PYI) && !SKIP_PYTHON) {
@@ -125,54 +120,27 @@ function buildPython(distDir) {
   }
 }
 
-function signPkgCache() {
-  // macOS 15 refuses to spawn unsigned arm64 binaries (errno -86 / EBADARCH).
-  // pkg's downloaded base Node binary is unsigned, so fabrication fails.
-  // Ad-hoc sign every file in the pkg cache before pkg's fabricate step.
-  const cacheDir = path.join(process.env.HOME || '', '.pkg-cache');
-  if (!fs.existsSync(cacheDir)) return;
-  try {
-    execSync(
-      `find "${cacheDir}" -type f -exec codesign --force --sign - {} + 2>/dev/null`,
-      { stdio: 'pipe' }
-    );
-  } catch {}
-}
+function copyApp(distDir) {
+  // Ship raw: bundle the system Node binary + scripter.js + production node_modules.
+  // We tried pkg/@yao-pkg/pkg but its custom Node binaries fail to spawn on
+  // macOS 15 (errno -86 / EBADARCH) because Apple Silicon now strictly requires
+  // arm64 binaries to be signed, and pkg's hash check rejects any post-hoc edits.
+  info('Copying Node runtime and app...');
 
-function buildNode(distDir, pkgTarget) {
-  info(`Building scripter binary with pkg (${pkgTarget})...`);
+  const nodeName = IS_WIN ? 'node.exe' : 'node';
+  const nodeSrc  = process.execPath;
+  const nodeDest = path.join(distDir, nodeName);
+  fs.copyFileSync(nodeSrc, nodeDest);
+  if (!IS_WIN) fs.chmodSync(nodeDest, 0o755);
 
-  const pkgArgs = [
-    PKG,
-    'scripter.js',
-    '--target', pkgTarget,
-    '--output', path.join(distDir, 'mimik-scripter'),
-    '--compress', 'GZip'
-  ].join(' ');
-
-  try {
-    run(pkgArgs);
-  } catch (e) {
-    if (!IS_MAC) throw e;
-    // First run downloaded the base binary; sign it and retry fabrication.
-    warn('pkg fabrication failed — signing pkg cache and retrying');
-    signPkgCache();
-    run(pkgArgs);
+  // macOS arm64: pre-sign so users on macOS 15 can launch without "binary not signed" errors.
+  if (IS_MAC) {
+    try { run(`codesign --force --sign - "${nodeDest}"`); } catch {}
   }
 
-  const binName = pkgTarget.includes('win') ? 'mimik-scripter.exe' : 'mimik-scripter';
-  const binPath = path.join(distDir, binName);
-
-  if (pkgTarget.includes('mac') && IS_MAC) {
-    try {
-      run(`codesign --force --sign - "${binPath}"`);
-      ok('Ad-hoc signed mimik-scripter binary');
-    } catch {
-      warn('codesign failed — binary may not run on macOS 15');
-    }
-  }
-
-  ok(`mimik-scripter binary → ${sizeMB(binPath)}`);
+  fs.copyFileSync(path.join(ROOT, 'scripter.js'), path.join(distDir, 'scripter.js'));
+  copyDir(path.join(ROOT, 'node_modules'),       path.join(distDir, 'node_modules'));
+  ok(`Node + app → ${sizeMB(distDir)}`);
 }
 
 function copyDir(src, dest) {
@@ -201,23 +169,22 @@ function copyPublic(distDir) {
 
 function writeLauncher(distDir, isWin) {
   if (isWin) {
-    // Run server in same window so output is visible; open browser in background
     const bat = [
       '@echo off',
       'cd /d "%~dp0"',
       'echo Starting Mimik Scripter...',
       'start /b cmd /c "timeout /t 2 /nobreak >nul && start http://localhost:8004"',
-      'mimik-scripter.exe',
+      'node.exe scripter.js',
     ].join('\r\n') + '\r\n';
     fs.writeFileSync(path.join(distDir, 'Launch Mimik Scripter.bat'), bat);
   } else {
-    // Open browser in background; run server in foreground so terminal stays open
     const sh = [
       '#!/bin/bash',
       'DIR="$(cd "$(dirname "$0")" && pwd)"',
+      'cd "$DIR"',
       'echo "Starting Mimik Scripter..."',
       '(sleep 2 && open http://localhost:8004 2>/dev/null || sleep 2 && xdg-open http://localhost:8004 2>/dev/null) &',
-      '"$DIR/mimik-scripter"',
+      '"$DIR/node" scripter.js',
     ].join('\n') + '\n';
     const p = path.join(distDir, 'launch-mimik-scripter.sh');
     fs.writeFileSync(p, sh);
@@ -279,9 +246,9 @@ function writeCLI(distDir, isWin) {
       '  )',
       ')',
       'echo Starting Mimik Scripter...',
-      'start /b "" "%~dp0mimik-scripter.exe" > "%~dp0mimik-scripter.log" 2>&1',
+      'start /b "" "%~dp0node.exe" scripter.js > "%~dp0mimik-scripter.log" 2>&1',
       'timeout /t 2 /nobreak >nul',
-      'for /f "tokens=2" %%i in (\'tasklist /fi "imagename eq mimik-scripter.exe" /fo list ^| findstr "PID"\') do (',
+      'for /f "tokens=2" %%i in (\'tasklist /fi "imagename eq node.exe" /fo list ^| findstr "PID"\') do (',
       '  echo %%i > "%PID_FILE%"',
       '  echo Started — PID %%i',
       ')',
@@ -333,7 +300,7 @@ function writeCLI(distDir, isWin) {
     const sh = [
       '#!/bin/bash',
       'DIR="$(cd "$(dirname "$0")" && pwd)"',
-      'BIN="$DIR/mimik-scripter"',
+      'NODE="$DIR/node"',
       'PID_FILE="$DIR/.mimik.pid"',
       'LOG="$DIR/mimik-scripter.log"',
       '',
@@ -350,7 +317,8 @@ function writeCLI(distDir, isWin) {
       '      exit 0',
       '    fi',
       '    echo "Starting Mimik Scripter..."',
-      '    "$BIN" > "$LOG" 2>&1 &',
+      '    cd "$DIR"',
+      '    "$NODE" scripter.js > "$LOG" 2>&1 &',
       '    echo $! > "$PID_FILE"',
       '    sleep 2',
       '    echo "Running — PID $(cat "$PID_FILE")"',
@@ -415,15 +383,16 @@ function zipDist(distDir, label) {
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
-async function buildFor(platformKey, pkgTarget) {
+async function buildFor(platformKey) {
   const label   = platformKey;
   const distDir = path.join(ROOT, 'dist', label);
+  fs.rmSync(distDir, { recursive: true, force: true });
   fs.mkdirSync(distDir, { recursive: true });
 
   console.log(`\n\x1b[1m  Building for: ${label}\x1b[0m`);
 
   buildPython(distDir);
-  buildNode(distDir, pkgTarget);
+  copyApp(distDir);
   copyModels(distDir);
   copyPublic(distDir);
   writeLauncher(distDir, platformKey === 'win');
@@ -434,7 +403,7 @@ async function buildFor(platformKey, pkgTarget) {
 
 function detectCurrentPlatform() {
   if (IS_WIN) return 'win';
-  if (IS_MAC) return 'mac';
+  if (IS_MAC) return process.arch === 'x64' ? 'mac-intel' : 'mac';
   return 'linux';
 }
 
@@ -443,24 +412,23 @@ async function main() {
   checkTools();
 
   if (BUILD_ALL) {
-    for (const [key, target] of Object.entries(PKG_TARGETS)) {
-      if (key === 'macarm') continue; // skip unless on ARM
-      await buildFor(key, target);
-    }
-  } else {
-    const platform = PLATFORM_ARG || detectCurrentPlatform();
-    const target   = PKG_TARGETS[platform];
-    if (!target) {
-      console.error(`Unknown platform: ${platform}. Use: linux, win, mac, macarm`);
-      process.exit(1);
-    }
-    if (platform !== detectCurrentPlatform() && !SKIP_PYTHON) {
-      warn(`Cross-platform build detected. PyInstaller cannot cross-compile.`);
-      warn(`The kokoro_tts binary must be built natively on ${platform}.`);
-      warn(`JS binary will still be built. Add --skip-python to suppress this.`);
-    }
-    await buildFor(platform, target);
+    warn('--all is no longer supported in ship-raw mode (the bundled Node binary');
+    warn('must match the host platform). Build each platform on its own runner.');
+    process.exit(1);
   }
+
+  const platform = PLATFORM_ARG || detectCurrentPlatform();
+  if (!PLATFORMS.includes(platform)) {
+    console.error(`Unknown platform: ${platform}. Use one of: ${PLATFORMS.join(', ')}`);
+    process.exit(1);
+  }
+  if (platform !== detectCurrentPlatform()) {
+    console.error(`\n  Cannot build for ${platform} from ${detectCurrentPlatform()} —`);
+    console.error(`  the bundled Node binary must match the host platform.`);
+    console.error(`  Run this build on a ${platform} machine (or CI runner).\n`);
+    process.exit(1);
+  }
+  await buildFor(platform);
 
   console.log('\n\x1b[32m\x1b[1mBuild complete.\x1b[0m\n');
   console.log('  Distribute the zip from dist/ — users need no Node.js or Python.\n');

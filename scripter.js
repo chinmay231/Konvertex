@@ -10,8 +10,7 @@ const fs       = require('fs');
 const os       = require('os');
 
 const IS_WIN   = process.platform === 'win32';
-const IS_PKG   = typeof process.pkg !== 'undefined';
-const BASE_DIR = IS_PKG ? path.dirname(process.execPath) : __dirname;
+const BASE_DIR = __dirname;
 const PUBLIC_DIR = path.join(BASE_DIR, 'public');
 
 // ── Logging ───────────────────────────────────────────────────────────────────

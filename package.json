@@ -18,8 +18,5 @@
     "msedge-tts": "^2.0.5",
     "multer": "^2.1.1",
     "uuid": "^14.0.0"
-  },
-  "devDependencies": {
-    "@yao-pkg/pkg": "^5.12.0"
   }
 }
