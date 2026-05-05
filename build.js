@@ -140,6 +140,14 @@ function copyApp(distDir) {
 
   fs.copyFileSync(path.join(ROOT, 'scripter.js'), path.join(distDir, 'scripter.js'));
   copyDir(path.join(ROOT, 'node_modules'),       path.join(distDir, 'node_modules'));
+
+  // Without a package.json here, Node walks up the directory tree and may find
+  // a parent package.json with "type": "module", which breaks our CommonJS code.
+  fs.writeFileSync(
+    path.join(distDir, 'package.json'),
+    JSON.stringify({ name: 'mimik-scripter', private: true, type: 'commonjs' }, null, 2)
+  );
+
   ok(`Node + app → ${sizeMB(distDir)}`);
 }
 
