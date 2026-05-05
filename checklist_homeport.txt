@@ -1,0 +1,19 @@
+Home setup checklist:
+
+Git auth — add the same SSH key to GitHub on the home machine, or use HTTPS with gh auth login.
+Git identity — git config --global user.name "Chinmay Kapoor" && git config --global user.email "chinmay.kapoor@mimik.com" (or whatever you use at home).
+System deps (same as before):
+Node 18+, Python 3.8–3.11
+Linux: sudo apt install libgomp1 libsndfile1 espeak-ng
+macOS: brew install espeak-ng + xcode-select --install
+Clone & install:
+
+git clone git@github.com:chinmay231/Konvertex.git tts_videos
+cd tts_videos
+node setup.js
+Optional but useful:
+gh CLI (brew install gh / apt install gh) so you can manage releases from terminal.
+Claude Code in the same project dir picks up the existing memory under ~/.claude/projects/-home-...-tts-videos/memory/ only if you manually copy that folder over. Otherwise Claude starts fresh — fine, since memory rebuilds itself naturally.
+Don't port: node_modules/, .venv/, models/, dist/, *.mp3 — all reproducible by setup.js.
+
+Do nothing extra — there are no env vars, no .env file, no API keys, no CI secrets to copy.
