@@ -1,4 +1,4 @@
-# Mimik Scripter — Roadmap
+# Konvertex — Roadmap
 
 ---
 
@@ -108,7 +108,7 @@ Current distributable is ~250 MB. Target: ~130 MB. Here is the path:
 UPX compresses executables by 40–60% without any quality loss.
 Requires `upx` on the build machine (`apt install upx-ucl` / `brew install upx`).
 ```bash
-upx --best dist/linux/mimik-scripter
+upx --best dist/linux/konvertex
 upx --best dist/linux/kokoro_tts
 # Estimated saving: ~50–60 MB
 ```
@@ -117,7 +117,7 @@ upx --best dist/linux/kokoro_tts
 Instead of shipping models in the zip, download them automatically on first launch.
 Reduces distributable from ~250 MB to ~130 MB. Models cached locally after first run.
 ```
-User downloads: mimik-scripter (~130 MB zip)
+User downloads: konvertex (~130 MB zip)
 First launch: "Downloading voice model (116 MB)..." progress bar
 Subsequent launches: instant
 ```
@@ -140,7 +140,7 @@ The int8 model (89 MB) is already quantized. Further options:
 
 **Total achievable (Phase 3 + lazy download):**
 ```
-mimik-scripter binary (pkg, no Python):  ~20 MB
+konvertex binary (pkg, no Python):  ~20 MB
 models/ (downloaded on first run):        ~0 MB in zip
 Total zip:                               ~20 MB
 First-run download:                      ~116 MB (cached forever)
@@ -170,7 +170,7 @@ jobs:
       - run: node build.js
       - uses: actions/upload-artifact@v3
         with:
-          name: mimik-scripter-${{ runner.os }}
+          name: konvertex-${{ runner.os }}
           path: dist/*.zip
 ```
 

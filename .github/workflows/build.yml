@@ -1,4 +1,4 @@
-name: Build Mimik Scripter
+name: Build Konvertex
 
 on:
   push:
@@ -64,4 +64,4 @@ jobs:
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/mimik-scripter-${{ matrix.platform }}.zip
+          files: dist/konvertex-${{ matrix.platform }}.zip

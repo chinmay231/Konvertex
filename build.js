@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Mimik Scripter — Build (Option A)
+ * Konvertex — Build (Option A)
  *
  * Produces a fully self-contained distributable in dist/<platform>/
  * No Node.js or Python required on the target machine.
@@ -145,7 +145,7 @@ function copyApp(distDir) {
   // a parent package.json with "type": "module", which breaks our CommonJS code.
   fs.writeFileSync(
     path.join(distDir, 'package.json'),
-    JSON.stringify({ name: 'mimik-scripter', private: true, type: 'commonjs' }, null, 2)
+    JSON.stringify({ name: 'konvertex', private: true, type: 'commonjs' }, null, 2)
   );
 
   ok(`Node + app → ${sizeMB(distDir)}`);
@@ -180,21 +180,21 @@ function writeLauncher(distDir, isWin) {
     const bat = [
       '@echo off',
       'cd /d "%~dp0"',
-      'echo Starting Mimik Scripter...',
+      'echo Starting Konvertex...',
       'start /b cmd /c "timeout /t 2 /nobreak >nul && start http://localhost:8004"',
       'node.exe scripter.js',
     ].join('\r\n') + '\r\n';
-    fs.writeFileSync(path.join(distDir, 'Launch Mimik Scripter.bat'), bat);
+    fs.writeFileSync(path.join(distDir, 'Launch Konvertex.bat'), bat);
   } else {
     const sh = [
       '#!/bin/bash',
       'DIR="$(cd "$(dirname "$0")" && pwd)"',
       'cd "$DIR"',
-      'echo "Starting Mimik Scripter..."',
+      'echo "Starting Konvertex..."',
       '(sleep 2 && open http://localhost:8004 2>/dev/null || sleep 2 && xdg-open http://localhost:8004 2>/dev/null) &',
       '"$DIR/node" scripter.js',
     ].join('\n') + '\n';
-    const p = path.join(distDir, 'launch-mimik-scripter.sh');
+    const p = path.join(distDir, 'launch-konvertex.sh');
     fs.writeFileSync(p, sh);
     fs.chmodSync(p, 0o755);
   }
@@ -202,16 +202,16 @@ function writeLauncher(distDir, isWin) {
 }
 
 function writeReadme(distDir) {
-  const isWin = fs.existsSync(path.join(distDir, 'mimik-scripter.exe'));
-  const cli   = isWin ? 'mimik.bat' : './mimik.sh';
-  const txt = `Mimik Scripter
-==============
+  const isWin = fs.existsSync(path.join(distDir, 'node.exe'));
+  const cli   = isWin ? 'konvertex.bat' : './konvertex.sh';
+  const txt = `Konvertex
+=========
 
 QUICK START
 -----------
 ${isWin
-  ? 'Double-click "Launch Mimik Scripter.bat"'
-  : 'Run: ./launch-mimik-scripter.sh'}
+  ? 'Double-click "Launch Konvertex.bat"'
+  : 'Run: ./launch-konvertex.sh'}
 Your browser opens automatically at http://localhost:8004
 
 TERMINAL COMMANDS
@@ -223,7 +223,7 @@ ${cli} uninstall  — Stop and delete all files
 
 LOGS
 ----
-Server output is saved to mimik-scripter.log in this folder.
+Server output is saved to konvertex.log in this folder.
 
 No installation required. Internet needed for Online mode only.
 Local (Kokoro) mode works fully offline.
@@ -236,7 +236,7 @@ function writeCLI(distDir, isWin) {
     const bat = [
       '@echo off',
       'cd /d "%~dp0"',
-      'set PID_FILE=%~dp0.mimik.pid',
+      'set PID_FILE=%~dp0.konvertex.pid',
       '',
       'if "%1"=="start"     goto start',
       'if "%1"=="stop"      goto stop',
@@ -253,8 +253,8 @@ function writeCLI(distDir, isWin) {
       '    exit /b 0',
       '  )',
       ')',
-      'echo Starting Mimik Scripter...',
-      'start /b "" "%~dp0node.exe" scripter.js > "%~dp0mimik-scripter.log" 2>&1',
+      'echo Starting Konvertex...',
+      'start /b "" "%~dp0node.exe" scripter.js > "%~dp0konvertex.log" 2>&1',
       'timeout /t 2 /nobreak >nul',
       'for /f "tokens=2" %%i in (\'tasklist /fi "imagename eq node.exe" /fo list ^| findstr "PID"\') do (',
       '  echo %%i > "%PID_FILE%"',
@@ -286,7 +286,7 @@ function writeCLI(distDir, isWin) {
       'exit /b 0',
       '',
       ':uninstall',
-      'set /p _confirm=Stop and delete Mimik Scripter? (y/N): ',
+      'set /p _confirm=Stop and delete Konvertex? (y/N): ',
       'if /i not "%_confirm%"=="y" ( echo Cancelled. & exit /b 0 )',
       'if exist "%PID_FILE%" ( set /p _PID=<"%PID_FILE%" & taskkill /pid %_PID% /f >nul 2>&1 )',
       'cd %TEMP%',
@@ -295,7 +295,7 @@ function writeCLI(distDir, isWin) {
       'exit /b 0',
       '',
       ':usage',
-      'echo Usage: mimik.bat [start^|stop^|status^|uninstall]',
+      'echo Usage: konvertex.bat [start^|stop^|status^|uninstall]',
       'echo.',
       'echo   start      Start the server and open browser',
       'echo   stop       Stop the running server',
@@ -303,14 +303,14 @@ function writeCLI(distDir, isWin) {
       'echo   uninstall  Stop and delete all files',
       'exit /b 0',
     ].join('\r\n') + '\r\n';
-    fs.writeFileSync(path.join(distDir, 'mimik.bat'), bat);
+    fs.writeFileSync(path.join(distDir, 'konvertex.bat'), bat);
   } else {
     const sh = [
       '#!/bin/bash',
       'DIR="$(cd "$(dirname "$0")" && pwd)"',
       'NODE="$DIR/node"',
-      'PID_FILE="$DIR/.mimik.pid"',
-      'LOG="$DIR/mimik-scripter.log"',
+      'PID_FILE="$DIR/.konvertex.pid"',
+      'LOG="$DIR/konvertex.log"',
       '',
       'cmd="${1:-}"',
       '',
@@ -324,7 +324,7 @@ function writeCLI(distDir, isWin) {
       '      echo "Already running (PID $(cat "$PID_FILE")) — http://localhost:8004"',
       '      exit 0',
       '    fi',
-      '    echo "Starting Mimik Scripter..."',
+      '    echo "Starting Konvertex..."',
       '    cd "$DIR"',
       '    "$NODE" scripter.js > "$LOG" 2>&1 &',
       '    echo $! > "$PID_FILE"',
@@ -349,7 +349,7 @@ function writeCLI(distDir, isWin) {
       '    fi',
       '    ;;',
       '  uninstall)',
-      '    echo "This will stop Mimik Scripter and delete: $DIR"',
+      '    echo "This will stop Konvertex and delete: $DIR"',
       '    read -r -p "Are you sure? (y/N) " confirm',
       '    if [[ "$confirm" != [yY] ]]; then echo "Cancelled."; exit 0; fi',
       '    is_running && kill "$(cat "$PID_FILE")" 2>/dev/null',
@@ -357,7 +357,7 @@ function writeCLI(distDir, isWin) {
       '    echo "Uninstalled."',
       '    ;;',
       '  *)',
-      '    echo "Usage: ./mimik.sh [start|stop|status|uninstall]"',
+      '    echo "Usage: ./konvertex.sh [start|stop|status|uninstall]"',
       '    echo ""',
       '    echo "  start      Start the server and open browser"',
       '    echo "  stop       Stop the running server"',
@@ -366,7 +366,7 @@ function writeCLI(distDir, isWin) {
       '    ;;',
       'esac',
     ].join('\n') + '\n';
-    const p = path.join(distDir, 'mimik.sh');
+    const p = path.join(distDir, 'konvertex.sh');
     fs.writeFileSync(p, sh);
     fs.chmodSync(p, 0o755);
   }
@@ -374,7 +374,7 @@ function writeCLI(distDir, isWin) {
 }
 
 function zipDist(distDir, label) {
-  const zipName = `mimik-scripter-${label}.zip`;
+  const zipName = `konvertex-${label}.zip`;
   const zipPath = path.join(ROOT, 'dist', zipName);
   info(`Creating ${zipName}...`);
   try {
@@ -416,7 +416,7 @@ function detectCurrentPlatform() {
 }
 
 async function main() {
-  console.log('\n\x1b[1mMimik Scripter — Build\x1b[0m');
+  console.log('\n\x1b[1mKonvertex — Build\x1b[0m');
   checkTools();
 
   if (BUILD_ALL) {

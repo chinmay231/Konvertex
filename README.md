@@ -1,4 +1,4 @@
-# Mimik Scripter — Neural Voice Studio
+# Konvertex — Neural Voice Studio
 
 Convert any script into high-quality audio narration.
 Supports **online** (Microsoft Neural) and **offline** (Kokoro) modes.
@@ -14,10 +14,10 @@ No installation needed. Download the zip for your operating system, unzip, and l
 
 | Your OS | File to download |
 |---|---|
-| Linux (Ubuntu, Debian, etc.) | `mimik-scripter-linux.zip` |
-| Windows 10 / 11 | `mimik-scripter-win.zip` |
-| macOS — Apple Silicon (M1/M2/M3/M4) | `mimik-scripter-mac.zip` |
-| macOS — Intel (i5/i7/i9) | `mimik-scripter-mac-intel.zip` |
+| Linux (Ubuntu, Debian, etc.) | `konvertex-linux.zip` |
+| Windows 10 / 11 | `konvertex-win.zip` |
+| macOS — Apple Silicon (M1/M2/M3/M4) | `konvertex-mac.zip` |
+| macOS — Intel (i5/i7/i9) | `konvertex-mac-intel.zip` |
 
 ### Step 2 — Unzip
 
@@ -27,11 +27,11 @@ Extract the zip anywhere — Desktop, Documents, wherever you like.
 
 **Linux / Mac:**
 ```bash
-./launch-mimik-scripter.sh
+./launch-konvertex.sh
 ```
 
 **Windows:**
-Double-click `Launch Mimik Scripter.bat`
+Double-click `Launch Konvertex.bat`
 
 Your browser opens automatically at **http://localhost:8004**
 
@@ -41,23 +41,23 @@ Your browser opens automatically at **http://localhost:8004**
 
 Every zip includes a management script for full control from the terminal.
 
-**Linux / Mac — `mimik.sh`**
+**Linux / Mac — `konvertex.sh`**
 ```bash
-./mimik.sh start      # start server and open browser
-./mimik.sh stop       # stop the server
-./mimik.sh status     # check if it's running
-./mimik.sh uninstall  # stop and delete everything
+./konvertex.sh start      # start server and open browser
+./konvertex.sh stop       # stop the server
+./konvertex.sh status     # check if it's running
+./konvertex.sh uninstall  # stop and delete everything
 ```
 
-**Windows — `mimik.bat`**
+**Windows — `konvertex.bat`**
 ```bat
-mimik.bat start
-mimik.bat stop
-mimik.bat status
-mimik.bat uninstall
+konvertex.bat start
+konvertex.bat stop
+konvertex.bat status
+konvertex.bat uninstall
 ```
 
-Logs are written to `mimik-scripter.log` in the same folder.
+Logs are written to `konvertex.log` in the same folder.
 
 ---
 
@@ -102,9 +102,9 @@ GitHub Actions will run a build on all 3 platforms to verify nothing is broken. 
 4. Click **Publish release**
 
 GitHub Actions automatically triggers a build for all 3 platforms. Once complete (~10–15 min), the zips are attached to the release page:
-- `mimik-scripter-linux.zip`
-- `mimik-scripter-win.zip`
-- `mimik-scripter-mac.zip`
+- `konvertex-linux.zip`
+- `konvertex-win.zip`
+- `konvertex-mac.zip`
 
 ### Step 3 — Share the link
 Send coworkers the GitHub Release URL. They pick the zip for their OS, unzip, and launch. Done.
@@ -120,13 +120,13 @@ Normally you don't need this — use GitHub Releases instead. Local builds are u
 ### On a Windows machine:
 ```bash
 node setup.js    # one-time: installs deps and downloads models
-node build.js    # produces dist/win/  and  dist/mimik-scripter-win.zip
+node build.js    # produces dist/win/  and  dist/konvertex-win.zip
 ```
 
 ### On a Mac:
 ```bash
 node setup.js
-node build.js    # produces dist/mac/  and  dist/mimik-scripter-mac.zip
+node build.js    # produces dist/mac/  and  dist/konvertex-mac.zip
 ```
 
 ---
@@ -196,7 +196,7 @@ node build.js --platform win           # build Windows (must run on Windows)
 node build.js --skip-python            # online mode only, no Python required
 ```
 
-Output goes to `dist/mimik-scripter-<platform>.zip`.
+Output goes to `dist/konvertex-<platform>.zip`.
 
 ### Uninstall
 
@@ -240,7 +240,7 @@ tts_videos/
 ├── dist/              ← Built distributable zips (produced by build.js)
 │   ├── linux/
 │   ├── win/
-│   └── mimik-scripter-linux.zip
+│   └── konvertex-linux.zip
 ├── .venv/             ← Python virtual environment (created by setup.js)
 └── node_modules/
 ```

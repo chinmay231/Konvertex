@@ -1,0 +1,11 @@
+[2026-05-06T21:06:00.348Z] Konvertex running at http://localhost:8004
+[2026-05-06T21:06:00.349Z] Log file: /home/hbtx1a/tts_videos/konvertex.log
+[2026-05-06T21:06:02.559Z] GET /profiles
+[2026-05-06T21:06:02.561Z] GET /local-voices
+[2026-05-06T21:06:02.562Z] GET /local-status
+[2026-05-06T21:07:39.806Z] GET /profiles
+[2026-05-06T21:07:39.807Z] GET /local-voices
+[2026-05-06T21:07:39.807Z] GET /local-status
+[2026-05-06T21:08:07.331Z] GET /profiles
+[2026-05-06T21:08:07.331Z] GET /local-voices
+[2026-05-06T21:08:07.332Z] GET /local-status

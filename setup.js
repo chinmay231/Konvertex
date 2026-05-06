@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Mimik Scripter — Setup
+ * Konvertex — Setup
  * Run once after downloading the project: node setup.js
  */
 
@@ -142,7 +142,7 @@ async function downloadModels() {
 }
 
 async function main() {
-  console.log('\n\x1b[1mMimik Scripter — Setup\x1b[0m\n');
+  console.log('\n\x1b[1mKonvertex — Setup\x1b[0m\n');
 
   await checkNode();
   await checkPython();

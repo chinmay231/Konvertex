@@ -15,7 +15,7 @@ const PUBLIC_DIR = path.join(BASE_DIR, 'public');
 
 // ── Logging ───────────────────────────────────────────────────────────────────
 
-const LOG_FILE = path.join(BASE_DIR, 'mimik-scripter.log');
+const LOG_FILE = path.join(BASE_DIR, 'konvertex.log');
 const logStream = fs.createWriteStream(LOG_FILE, { flags: 'a' });
 
 function log(...args) {
@@ -133,7 +133,7 @@ app.post('/generate', async (req, res) => {
 
   const profile = ONLINE_PROFILES[profileKey] || ONLINE_PROFILES.narrator;
   const jobId   = uuidv4();
-  const outPath = path.join(os.tmpdir(), `mimik_${jobId}.mp3`);
+  const outPath = path.join(os.tmpdir(), `konvertex_${jobId}.mp3`);
 
   jobs[jobId] = { status: 'running', progress: 10, outputPath: outPath, format: 'mp3' };
   res.json({ jobId });
@@ -173,7 +173,7 @@ app.post('/generate-local', (req, res) => {
   if (!text?.trim()) return res.status(400).json({ error: 'No text provided' });
 
   const jobId   = uuidv4();
-  const outPath = path.join(os.tmpdir(), `mimik_${jobId}.wav`);
+  const outPath = path.join(os.tmpdir(), `konvertex_${jobId}.wav`);
 
   jobs[jobId] = { status: 'running', progress: 15, outputPath: outPath, format: 'wav' };
   res.json({ jobId });
@@ -236,11 +236,11 @@ app.get('/audio/:jobId', (req, res) => {
 app.get('/download/:jobId', (req, res) => {
   const job = jobs[req.params.jobId];
   if (!job || job.status !== 'done') return res.status(400).json({ error: 'Not ready' });
-  res.download(job.outputPath, `mimik_audio.${job.format === 'wav' ? 'wav' : 'mp3'}`);
+  res.download(job.outputPath, `konvertex_audio.${job.format === 'wav' ? 'wav' : 'mp3'}`);
 });
 
 const PORT = process.env.PORT || 8004;
 app.listen(PORT, () => {
-  log(`Mimik Scripter running at http://localhost:${PORT}`);
+  log(`Konvertex running at http://localhost:${PORT}`);
   log(`Log file: ${LOG_FILE}`);
 });

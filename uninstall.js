@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Mimik Scripter — Uninstall
+ * Konvertex — Uninstall
  * Removes all installed dependencies: node_modules, .venv, and downloaded models.
  * Does NOT delete your project files or scripts.
  *
@@ -26,7 +26,7 @@ function rm(dir) {
   }
 }
 
-console.log('\n\x1b[1mMimik Scripter — Uninstall\x1b[0m\n');
+console.log('\n\x1b[1mKonvertex — Uninstall\x1b[0m\n');
 
 for (const dir of DIRS) rm(dir);
 

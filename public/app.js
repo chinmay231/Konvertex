@@ -339,7 +339,7 @@ function showResult(jobId, format) {
   const download = document.getElementById('btn-download');
   player.src     = `/audio/${jobId}?t=${Date.now()}`;
   download.href  = `/download/${jobId}`;
-  download.download = `mimik_audio.${ext}`;
+  download.download = `konvertex_audio.${ext}`;
   document.getElementById('result-section').classList.add('visible');
   player.play().catch(() => {});
 }
